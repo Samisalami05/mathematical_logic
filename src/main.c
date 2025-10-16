@@ -1,6 +1,6 @@
+#include "util.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include "prop_logic.h"
 
 #define MAX_TERM_SYMBOL_LENGTH 10
 
@@ -18,6 +18,8 @@ typedef struct term {
 } term;
 
 static void skip_whitespace(char* str, int* index);
+static char* parse_term(char* str, int* index);
+static term* parse_parentheses(char* str, int* index); 
 static term* parse_formula(char* str);
 
 static void print_term_child(term* t, int child_index);
@@ -62,9 +64,28 @@ static term* parse_parentheses(char* str, int* index) {
 				char* symbol = parse_term(str, index);
 				printf("term %d: %s\n", term_index, symbol);
 
-				t->symbol = symbol;
-				t->child_count = 0;
-				t->children = NULL;
+				if (symbol[0] == '!') { // Split if symbol contains ! connective
+					char* not_symbol = malloc(2);
+					not_symbol[0] = '!';
+					not_symbol[1] = '\0';
+
+					str_remove_first(symbol);
+
+					term* t2 = malloc(sizeof(term));
+					t2->symbol = symbol;
+					t2->child_count = 0;
+					t2->children = NULL;
+
+					t->symbol = not_symbol;
+					t->child_count = 1;
+					t->children = malloc(sizeof(term*) * 1);
+					t->children[0] = t2;
+				}
+				else {
+					t->symbol = symbol;
+					t->child_count = 0;
+					t->children = NULL;
+				}
 			}
 
 			switch (term_index) {
@@ -147,32 +168,8 @@ static void print_term_tree(term* t) {
 	}
 }
 
-int main(void) {
-	term var1 = {
-		"var1",
-		NULL,
-		0
-	};
-
-	term var2 = {
-		"var2",
-		NULL,
-		1
-	};
-
-	term root = {
-		"v",
-		NULL,
-		1
-	};
-
-	term* children[] = {&var1, &var2};
-	root.children = children;
-
-	print_term_tree(&root);
-	printf("\n");
-
-	term* t = parse_formula("((a v b) v q)");
+int main(void) {	
+	term* t = parse_formula("((!abc) v q)");
 	print_term_tree(t);
 	printf("\n");
 }
