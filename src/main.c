@@ -1,6 +1,7 @@
 #include "util.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define MAX_TERM_SYMBOL_LENGTH 10
 
@@ -168,8 +169,19 @@ static void print_term_tree(term* t) {
 	}
 }
 
-int main(void) {	
-	term* t = parse_formula("((!abc) v q)");
+int main(void) {
+	char buffer[1000];
+
+	printf("Enter a formula: ");
+    if (fgets(buffer, sizeof(buffer), stdin) != NULL) {
+        // Remove trailing newline, if any
+        buffer[strcspn(buffer, "\n")] = '\0';
+        printf("You entered: %s\n", buffer);
+    } else {
+        fprintf(stderr, "Error reading input.\n");
+    }
+
+	term* t = parse_formula(buffer);
 	print_term_tree(t);
 	printf("\n");
 }
