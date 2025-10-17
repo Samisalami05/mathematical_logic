@@ -32,7 +32,7 @@ static term* parse_formula(char* str);
 
 static void print_term_child(char* str, term* t, int child_index);
 static void print_term(char* str, term* t);
-static void print_term_tree(term* t);
+static void print_term_tree(char* str, term* t);
 
 static void skip_whitespace(char* str, unsigned int* index) {
 	while (str[*index] == ' ') {
@@ -207,8 +207,13 @@ static void print_term(char* str, term* t) {
 	}
 }
 
-static void print_term_tree(term* t) {
-	
+static void print_term_tree_recursive(char* str, term* t, unsigned int* leaves) {
+	printf("%c", str[t->index]);
+}
+
+static void print_term_tree(char* str, term* t) {
+	unsigned int leaf_count = 0;
+	printf("%c\n", str[t->index]);
 }
 
 int main(void) {
@@ -228,4 +233,6 @@ int main(void) {
 		exit(EXIT_FAILURE);
 	print_term(buffer, t);
 	printf("\n");
+
+	print_term_tree(buffer, t);
 }
