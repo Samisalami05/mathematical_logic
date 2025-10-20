@@ -51,13 +51,30 @@ static void print_term(char* str, term* t) {
 	}
 }
 
-static void print_term_tree_recursive(char* str, term* t, unsigned int* leaves) {
-	printf("%c", str[t->index]);
+static void print_term_tree_recursive(char* str, term* t, unsigned int padding, char last) {
+	for (int i = 0; i < padding; i++) {
+		printf("|  ");
+	}
+	char* beginning = last ? "`- " : "|- ";
+	if (t->type == ATOM) {
+		printf("%s%.*s\n", beginning, t->length, &str[t->index]);
+	}
+	else {
+		printf("%s%c\n", beginning, term_symbol(t->type));
+	}
+	
+	if (t->children != NULL) {
+		for (int i = 0; i < t->child_count; i++) {
+			if (t->children[i] == NULL) {
+				break;
+			}
+			print_term_tree_recursive(str, t->children[i], padding + 1, i == t->child_count - 1);
+		}
+	}
 }
 
 static void print_term_tree(char* str, term* t) {
-	unsigned int leaf_count = 0;
-	printf("%c\n", str[t->index]);
+	print_term_tree_recursive(str, t, 0, 0);
 }
 
 int main(void) {
@@ -75,11 +92,17 @@ int main(void) {
 	term* t = parse_formula(buffer);
 	if (t == NULL)
 		exit(EXIT_FAILURE);
-	
+
+	print_term(buffer, t);
+	printf("\n\n");
+
+	print_term_tree(buffer, t);
+
+	printf("\nConverting to cnf\n");
 	t = convert_to_cnf(t);
 
 	print_term(buffer, t);
 	printf("\n");
 
-	// print_term_tree(buffer, t);
+	print_term_tree(buffer, t);
 }

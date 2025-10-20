@@ -21,6 +21,8 @@ typedef struct term {
 	int child_count;
 } term;
 
+char term_symbol(term_type type);
+
 term* parse_term(char* str, unsigned int index, unsigned int length);
 
 term* parse_parentheses(char* str, unsigned int* index); 

@@ -13,7 +13,7 @@ static term* formula_negate(term* formula) {
 	negation->child_count = 1;
 	negation->children = malloc(sizeof(term*));
 	negation->children[0] = formula;
-	return formula;
+	return negation;
 }
 
 static term* de_morgans_law(term* formula) {
@@ -23,6 +23,7 @@ static term* de_morgans_law(term* formula) {
 		switch (children[0]->type) {
 			case CONNECTIVE_AND:
 				children = formula->children[0]->children;
+				free(formula->children[0]);
 				formula->type = CONNECTIVE_OR;
 				formula->child_count = 2;
 				formula->children = realloc(formula->children, sizeof(term*) * 2);
@@ -34,6 +35,7 @@ static term* de_morgans_law(term* formula) {
 				break;
 			case CONNECTIVE_OR:
 				children = formula->children[0]->children;
+				free(formula->children[0]);
 				formula->type = CONNECTIVE_AND;
 				formula->child_count = 2;
 				formula->children = realloc(formula->children, sizeof(term*) * 2);
@@ -57,6 +59,7 @@ static term* de_morgans_law(term* formula) {
 
 
 term* convert_to_cnf(term* formula) {
+	de_morgans_law(formula);
 	de_morgans_law(formula);
 	return formula;
 }

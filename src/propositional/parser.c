@@ -25,6 +25,19 @@ term_type term_connective(char* str, int index) {
 	return ATOM;
 }
 
+char term_symbol(term_type type) {
+	switch (type) {
+		case CONNECTIVE_AND:
+			return SYMBOL_AND;
+		case CONNECTIVE_OR:
+			return SYMBOL_OR;
+		case CONNECTIVE_NOT:
+			return SYMBOL_NOT;
+		default:
+			return '?';
+	}
+}
+
 // Returns length
 unsigned int skip_term(char* str, unsigned int* index) {
 	unsigned int len = 0;
@@ -47,20 +60,31 @@ term* create_term(char* str, unsigned int* index) {
 		t->child_count = 0;
 		t->children = NULL;
 	}
-	else if (str[*index - term_length] == SYMBOL_NOT) { // Split if symbol contains ! connective	
-		term* t2 = malloc(sizeof(term));
-		t2->type = ATOM;
-		t2->index = *index - term_length + 1;
-		t2->length = term_length - 1;
-		t2->child_count = 0;
-		t2->children = NULL;
+	else if (str[*index - term_length] == SYMBOL_NOT) { // Split if symbol contains ! term_connective
+		if (str[*index - term_length + 1] == '(') {
+			t->type = CONNECTIVE_NOT;
+			t->index = *index - term_length;
+			t->length = 1;
+			t->child_count = 1;
+			t->children = malloc(sizeof(term*) * 1);
+			*index -= term_length - 2;
+			t->children[0] = parse_parentheses(str, index);
+		}
+		else {
+			term* t2 = malloc(sizeof(term));
+			t2->type = ATOM;
+			t2->index = *index - term_length + 1;
+			t2->length = term_length - 1;
+			t2->child_count = 0;
+			t2->children = NULL;
 
-		t->type = CONNECTIVE_NOT;
-		t->index = *index - term_length;
-		t->length = 1;
-		t->child_count = 1;
-		t->children = malloc(sizeof(term*) * 1);
-		t->children[0] = t2;
+			t->type = CONNECTIVE_NOT;
+			t->index = *index - term_length;
+			t->length = 1;
+			t->child_count = 1;
+			t->children = malloc(sizeof(term*) * 1);
+			t->children[0] = t2;
+		}
 	}
 	else {
 		t->type = ATOM;
@@ -109,7 +133,7 @@ term* parse_parentheses(char* str, unsigned int* index) {
 					t->children = malloc(sizeof(term*) * 2);
 					t->children[0] = temp;
 					break;
-				case 2:
+				case 2:	
 					sub_root->children[1] = t;
 					break;
 				default:
